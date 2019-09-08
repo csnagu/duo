@@ -1,5 +1,9 @@
 # duo
 
+# About
+Todo + Timekeeper
+
+
 ## Project setup
 ```
 npm install
