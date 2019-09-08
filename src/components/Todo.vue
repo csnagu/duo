@@ -2,7 +2,7 @@
   <v-form>
     <v-container>
       <v-flex>
-        <v-icon @click="addTask()">mdi-plus-circle-outline</v-icon>
+        <v-icon id="addTaskBtn" @click="addTask()">mdi-plus-circle-outline</v-icon>
       </v-flex>
 
       <v-col>
@@ -11,10 +11,10 @@
             <span>{{ task }}</span>
             <v-row justify="space-around" align="center">
               <v-flex xs1>
-                <v-icon>mdi-check-circle-outline</v-icon>
+                <v-icon class="doneTaskBtn" @click="doneTask(task.id)">mdi-check-circle-outline</v-icon>
               </v-flex>
               <v-flex xs1>
-                <v-icon @click="removeTask(task.id)">mdi-delete</v-icon>
+                <v-icon class="removeTaskBtn" @click="removeTask(task.id)">mdi-delete</v-icon>
               </v-flex>
               <v-flex xs10>
                 <v-text-field :label="task.item" v-model="task.item"></v-text-field>
@@ -43,7 +43,8 @@ export default {
     addTask: function() {
       const obj = {
         id: this.getUniqueStr(),
-        item: ""
+        item: "",
+        done: false
       };
       this.tasks.push(obj);
     },
@@ -53,6 +54,12 @@ export default {
       });
       const targetIndex = this.tasks.indexOf(target);
       delete this.tasks.splice(targetIndex, 1);
+    },
+    doneTask: function(id) {
+      let target = this.tasks.find(ele => {
+        return ele.id == id;
+      });
+      target.done = true;
     },
     getUniqueStr: function() {
       var strong = 1000;
