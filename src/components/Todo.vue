@@ -2,7 +2,9 @@
   <v-form>
     <v-container>
       <v-flex>
-        <v-icon id="addTaskBtn" @click="addTask()">mdi-plus-circle-outline</v-icon>
+        <v-icon id="addTaskBtn" @click="addTask()"
+          >mdi-plus-circle-outline</v-icon
+        >
       </v-flex>
 
       <v-col>
@@ -11,13 +13,28 @@
             <span>{{ task }}</span>
             <v-row justify="space-around" align="center">
               <v-flex xs1>
-                <v-icon class="doneTaskBtn" @click="doneTask(task.id)">mdi-check-circle-outline</v-icon>
+                <v-icon class="doneTaskBtn" @click="doneTask(task)"
+                  >mdi-check-circle-outline</v-icon
+                >
               </v-flex>
               <v-flex xs1>
-                <v-icon class="removeTaskBtn" @click="removeTask(task.id)">mdi-delete</v-icon>
+                <v-icon class="removeTaskBtn" @click="removeTask(task)"
+                  >mdi-delete</v-icon
+                >
               </v-flex>
               <v-flex xs10>
-                <v-text-field :label="task.item" v-model="task.item"></v-text-field>
+                <s v-if="task.done">
+                  <v-text-field
+                    :label="task.item"
+                    v-model="task.item"
+                  ></v-text-field>
+                </s>
+                <span v-else>
+                  <v-text-field
+                    :label="task.item"
+                    v-model="task.item"
+                  ></v-text-field>
+                </span>
               </v-flex>
             </v-row>
           </v-flex>
@@ -48,18 +65,16 @@ export default {
       };
       this.tasks.push(obj);
     },
-    removeTask: function(id) {
-      const target = this.tasks.find(ele => {
-        return ele.id == id;
-      });
-      const targetIndex = this.tasks.indexOf(target);
-      delete this.tasks.splice(targetIndex, 1);
+    removeTask: function(targetTask) {
+      this.tasks = this.tasks.filter(task => task !== targetTask);
     },
-    doneTask: function(id) {
-      let target = this.tasks.find(ele => {
-        return ele.id == id;
+    doneTask: function(targetTask) {
+      this.tasks = this.tasks.map(task => {
+        if (task === targetTask) {
+          task.done = true;
+        }
+        return task;
       });
-      target.done = true;
     },
     getUniqueStr: function() {
       var strong = 1000;
