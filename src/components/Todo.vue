@@ -7,6 +7,8 @@
         >
       </v-flex>
 
+      <v-icon @click="timer()">mdi-timer</v-icon>
+      <span>{{ time }} : {{ isRunning }}</span>
       <v-col>
         <draggable>
           <v-flex xs6 v-for="task in tasks" v-bind:key="task.id">
@@ -51,9 +53,18 @@ export default {
   components: {
     draggable
   },
+  computed: {
+    time: function() {
+      return this.diffTime;
+    }
+  },
   data: function() {
     return {
-      tasks: []
+      tasks: [],
+      timerAnimation: undefined,
+      startTime: Date.now(),
+      diffTime: 0,
+      isRunning: false
     };
   },
   methods: {
@@ -82,6 +93,22 @@ export default {
         new Date().getTime().toString(16) +
         Math.floor(strong * Math.random()).toString(16)
       );
+    },
+    timer: function() {
+      if (this.isRunning) {
+        this.stopTimer();
+      } else {
+        this.startTimer();
+      }
+      this.isRunning = !this.isRunning;
+    },
+    startTimer: function() {
+      const nowTime = Date.now();
+      this.diffTime = nowTime - this.startTime;
+      this.timerAnimation = requestAnimationFrame(this.startTimer);
+    },
+    stopTimer: function() {
+      cancelAnimationFrame(this.timerAnimation);
     }
   }
 };
