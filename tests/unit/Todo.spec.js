@@ -76,3 +76,51 @@ describe("Todoの各ボタンが機能するか", () => {
     expect(wrapper.vm.tasks).toEqual(expectData);
   });
 });
+
+describe("ストップウォッチのボタンが機能するか", () => {
+  const vuetify = new Vuetify();
+  let wrapper;
+
+  beforeEach(() => {
+    wrapper = mount(Todo, {
+      localVue,
+      vuetify
+    });
+    wrapper.find("#addTaskBtn").trigger("click");
+  });
+
+  it("ページにアクセスしたときの時間は、0が表示されていること", () => {
+    const workTime = Number(wrapper.find(".workTime").text());
+    expect(workTime).toEqual(0);
+  });
+
+  it("ストップウォッチボタンを一度クリックすると、時間が増加すること", () => {
+    wrapper.find(".timerBtn").trigger("click");
+    const workTime = Number(wrapper.find(".workTime").text());
+    console.log(workTime);
+    expect(workTime).toBeGreaterThan(0);
+  });
+
+  it("ストップウォッチボタンを二度クリックすると、カウントが停止されること", () => {
+    wrapper.find(".timerBtn").trigger("click");
+    wrapper.find(".timerBtn").trigger("click");
+
+    const workTime = Number(wrapper.find(".workTime").text());
+    expect(workTime).toBeGreaterThan(0);
+
+    // 1秒後に.work-timeが変化していないことを確認する
+    setTimeout(
+      expect(workTime).toEqual(Number(wrapper.find(".workTime").text())),
+      1000
+    );
+  });
+
+  it("ストップウォッチを再開すると、停止した時間から計測が再開すること", () => {
+    wrapper.find(".timerBtn").trigger("click");
+    setTimeout(wrapper.find(".timerBtn").trigger("click"), 2000);
+
+    const workTime = Number(wrapper.find(".workTime").text());
+    wrapper.find(".timerBtn").trigger("click");
+    expect(Number(wrapper.find(".workTime").text())).toBeGreaterThan(workTime);
+  });
+});
