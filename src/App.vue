@@ -1,6 +1,6 @@
 <template>
   <v-app>
-    <v-app-bar app>
+    <!-- <v-app-bar app>
       <v-toolbar-title class="headline">
         <span>toolbar</span>
       </v-toolbar-title>
@@ -12,7 +12,7 @@
       >
         <span class="mr-2">Latest Release</span>
       </v-btn>
-    </v-app-bar>
+    </v-app-bar>-->
 
     <v-content>
       <Todo />
