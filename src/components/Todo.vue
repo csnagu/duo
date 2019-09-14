@@ -2,7 +2,9 @@
   <v-form>
     <v-container>
       <v-flex>
-        <v-icon id="addTaskBtn" @click="addTask()">mdi-plus-circle-outline</v-icon>
+        <v-btn icon color="red">
+          <v-icon id="addTaskBtn" @click="addTask()">mdi-plus-circle-outline</v-icon>
+        </v-btn>
       </v-flex>
 
       <v-col>
@@ -11,23 +13,35 @@
             <!-- <span>{{ task }}</span> -->
             <v-row justify="space-around" align="center">
               <v-flex xs1>
-                <v-icon class="doneTaskBtn" @click="doneTask(task)">mdi-check-circle-outline</v-icon>
+                <v-btn
+                  icon
+                  color="green"
+                  :loading="task.loading"
+                  :disabled="task.loading"
+                  @click="loader(task)"
+                >
+                  <v-icon class="doneTaskBtn" @click="doneTask(task)">mdi-check-circle-outline</v-icon>
+                </v-btn>
               </v-flex>
               <v-flex xs1>
                 <v-icon class="removeTaskBtn" @click="removeTask(task)">mdi-delete</v-icon>
               </v-flex>
-              <v-flex xs9>
+              <v-flex xs8>
                 <s v-if="task.done">
-                  <v-text-field :label="task.item" v-model="task.item"></v-text-field>
+                  <v-text-field single-line v-model="task.item"></v-text-field>
                 </s>
                 <span v-else>
-                  <v-text-field :label="task.item" v-model="task.item"></v-text-field>
+                  <v-text-field single-line v-model="task.item"></v-text-field>
                 </span>
               </v-flex>
               <v-flex xs1>
-                <v-icon class="timerBtn" @click="timer(task)">mdi-timer</v-icon>
-                <span class="workTime">{{ task.diffTime | msToHHMMSS }}</span>
-                <!-- <span class="workTime">{{ task.diffTime }}</span> -->
+                <v-btn icon color="blue">
+                  <v-icon v-if="!task.isRunning" class="timerBtn" @click="timer(task)">mdi-timer</v-icon>
+                  <v-icon v-else class="timerBtn" @click="timer(task)">mdi-watch-vibrate</v-icon>
+                </v-btn>
+              </v-flex>
+              <v-flex xs1>
+                <span class="workTime">{{ task.workTime | msToHHMMSS }}</span>
               </v-flex>
             </v-row>
           </v-flex>
@@ -39,6 +53,7 @@
 
 <script>
 import draggable from "vuedraggable";
+import { setTimeout } from "timers";
 
 export default {
   components: {
@@ -46,7 +61,8 @@ export default {
   },
   data: function() {
     return {
-      tasks: []
+      tasks: [],
+      done: false
     };
   },
   filters: {
@@ -62,6 +78,10 @@ export default {
     }
   },
   methods: {
+    loader: function(task) {
+      task.loading = true;
+      setTimeout(() => (task.loading = false), 500);
+    },
     addTask: function() {
       const obj = {
         id: this.getUniqueStr(),
@@ -69,10 +89,10 @@ export default {
         done: false,
         workTime: 0,
         startTime: 0,
-        diffTime: 0,
         wipTime: 0,
         isRunning: false,
-        timerAnimation: undefined
+        timerAnimation: undefined,
+        loading: false
       };
       this.tasks.push(obj);
     },
@@ -96,7 +116,7 @@ export default {
     },
     timer: function(task) {
       if (task.isRunning) {
-        task.wipTime = task.diffTime;
+        task.wipTime = task.workTime;
         this.stopTimer(task);
       } else {
         task.startTime = Date.now();
@@ -106,8 +126,8 @@ export default {
     },
     startTimer: function(task) {
       const nowTime = Date.now();
-      task.diffTime = nowTime - task.startTime;
-      task.diffTime += task.wipTime;
+      task.workTime = nowTime - task.startTime;
+      task.workTime += task.wipTime;
       task.timerAnimation = requestAnimationFrame(() => {
         this.startTimer(task);
       });

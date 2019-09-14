@@ -73,7 +73,7 @@ describe("Todoの各ボタンが機能するか", () => {
     ];
 
     wrapper.find(".doneTaskBtn").trigger("click");
-    expect(wrapper.vm.tasks).toEqual(expectData);
+    expect(wrapper.vm.tasks).toMatchObject(expectData);
   });
 });
 
@@ -89,15 +89,16 @@ describe("ストップウォッチのボタンが機能するか", () => {
     wrapper.find("#addTaskBtn").trigger("click");
   });
 
-  it("ページにアクセスしたときの時間は、0が表示されていること", () => {
-    const workTime = Number(wrapper.find(".workTime").text());
+  it("ページにアクセスしたときの時間は、0であること", () => {
+    const workTime = wrapper.vm.tasks[0]["startTime"];
     expect(workTime).toEqual(0);
   });
 
   it("ストップウォッチボタンを一度クリックすると、時間が増加すること", () => {
     wrapper.find(".timerBtn").trigger("click");
-    const workTime = Number(wrapper.find(".workTime").text());
-    console.log(workTime);
+    setTimeout(wrapper.find(".timerBtn").trigger("click"), 2000);
+    const workTime = wrapper.vm.tasks[0]["startTime"];
+
     expect(workTime).toBeGreaterThan(0);
   });
 
@@ -105,12 +106,12 @@ describe("ストップウォッチのボタンが機能するか", () => {
     wrapper.find(".timerBtn").trigger("click");
     wrapper.find(".timerBtn").trigger("click");
 
-    const workTime = Number(wrapper.find(".workTime").text());
+    const workTime = wrapper.vm.tasks[0]["startTime"];
     expect(workTime).toBeGreaterThan(0);
 
     // 1秒後に.work-timeが変化していないことを確認する
     setTimeout(
-      expect(workTime).toEqual(Number(wrapper.find(".workTime").text())),
+      expect(workTime).toEqual(wrapper.vm.tasks[0]["startTime"]),
       1000
     );
   });
@@ -119,8 +120,8 @@ describe("ストップウォッチのボタンが機能するか", () => {
     wrapper.find(".timerBtn").trigger("click");
     setTimeout(wrapper.find(".timerBtn").trigger("click"), 2000);
 
-    const workTime = Number(wrapper.find(".workTime").text());
+    const workTime = wrapper.vm.tasks[0]["startTime"];
     wrapper.find(".timerBtn").trigger("click");
-    expect(Number(wrapper.find(".workTime").text())).toBeGreaterThan(workTime);
+    expect(wrapper.vm.tasks[0]["startTime"]).toBeGreaterThan(workTime);
   });
 });
