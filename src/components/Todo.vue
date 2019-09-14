@@ -1,50 +1,75 @@
 <template>
   <v-form>
     <v-container>
-      <v-flex>
-        <v-btn icon color="red">
-          <v-icon id="addTaskBtn" @click="addTask()">mdi-plus-circle-outline</v-icon>
-        </v-btn>
-      </v-flex>
-
+      <v-btn icon color="red">
+        <v-icon id="addTaskBtn" @click="addTask(tasks)">mdi-plus-circle-outline</v-icon>
+      </v-btn>
+      <!-- {{ tasks }} -->
       <v-col>
-        <draggable>
-          <v-flex xs7 v-for="task in tasks" v-bind:key="task.id">
-            <!-- <span>{{ task }}</span> -->
-            <v-row justify="space-around" align="center">
-              <v-flex xs1>
-                <v-btn
-                  icon
-                  color="green"
-                  :loading="task.loading"
-                  :disabled="task.loading"
-                  @click="loader(task)"
-                >
-                  <v-icon class="doneTaskBtn" @click="doneTask(task)">mdi-check-circle-outline</v-icon>
-                </v-btn>
-              </v-flex>
+        <draggable :options="{group: 'tasks'}" v-model="tasks">
+          <div v-for="task in tasks" v-bind:key="task.id">
+            <v-row align="center">
               <v-flex xs1>
                 <v-icon class="removeTaskBtn" @click="removeTask(task)">mdi-delete</v-icon>
               </v-flex>
-              <v-flex xs8>
-                <s v-if="task.done">
-                  <v-text-field single-line v-model="task.item"></v-text-field>
-                </s>
-                <span v-else>
-                  <v-text-field single-line v-model="task.item"></v-text-field>
-                </span>
-              </v-flex>
-              <v-flex xs1>
-                <v-btn icon color="blue">
-                  <v-icon v-if="!task.isRunning" class="timerBtn" @click="timer(task)">mdi-timer</v-icon>
-                  <v-icon v-else class="timerBtn" @click="timer(task)">mdi-watch-vibrate</v-icon>
-                </v-btn>
-              </v-flex>
-              <v-flex xs1>
-                <span class="workTime">{{ task.workTime | msToHHMMSS }}</span>
+              <v-flex xs6>
+                <v-text-field single-line hide-details v-model="task.item"></v-text-field>
+                <!-- {{ task }} -->
               </v-flex>
             </v-row>
-          </v-flex>
+
+            <!-- sub -->
+            <v-btn icon color="red">
+              <v-icon id="addTaskBtn" @click="addTask(task.tasks)">mdi-plus-circle-outline</v-icon>
+            </v-btn>
+
+            <draggable :options="{group: 'task.tasks'}" v-model="task.tasks">
+              <div v-for="child in task.tasks" v-bind:key="child.id">
+                <v-row align="center">
+                  <v-flex xs1></v-flex>
+                  <v-flex xs1>
+                    <v-btn
+                      icon
+                      color="green"
+                      :loading="child.loading"
+                      :disabled="child.loading"
+                      @click="loader(child)"
+                    >
+                      <v-icon
+                        class="doneTaskBtn"
+                        @click="doneSubTask(task.tasks, child)"
+                      >mdi-check-circle-outline</v-icon>
+                    </v-btn>
+                  </v-flex>
+                  <v-flex xs1>
+                    <v-icon
+                      class="removeTaskBtn"
+                      @click="task.tasks = removeSubTask(task.tasks, child)"
+                    >mdi-delete</v-icon>
+                  </v-flex>
+                  <v-flex xs5>
+                    <v-text-field v-model="child.item"></v-text-field>
+                    <!-- {{ child }} -->
+                  </v-flex>
+                  <v-flex xs1>
+                    <v-btn icon color="blue">
+                      <v-icon
+                        v-if="!child.isRunning"
+                        class="timerBtn"
+                        @click="timer(child)"
+                      >mdi-timer</v-icon>
+                      <v-icon v-else class="timerBtn" @click="timer(child)">mdi-watch-vibrate</v-icon>
+                    </v-btn>
+                  </v-flex>
+                  <v-flex xs1>
+                    <span class="workTime">{{ child.workTime | msToHHMMSS }}</span>
+                  </v-flex>
+                  <v-flex xs2></v-flex>
+                </v-row>
+              </div>
+            </draggable>
+            <!-- end sub -->
+          </div>
         </draggable>
       </v-col>
     </v-container>
@@ -82,7 +107,7 @@ export default {
       task.loading = true;
       setTimeout(() => (task.loading = false), 500);
     },
-    addTask: function() {
+    addTask: function(arr) {
       const obj = {
         id: this.getUniqueStr(),
         item: "",
@@ -92,15 +117,27 @@ export default {
         wipTime: 0,
         isRunning: false,
         timerAnimation: undefined,
-        loading: false
+        loading: false,
+        tasks: []
       };
-      this.tasks.push(obj);
+      arr.push(obj);
     },
     removeTask: function(targetTask) {
       this.tasks = this.tasks.filter(task => task !== targetTask);
     },
     doneTask: function(targetTask) {
       this.tasks = this.tasks.map(task => {
+        if (task === targetTask) {
+          task.done = true;
+        }
+        return task;
+      });
+    },
+    removeSubTask: function(subTasks, targetTask) {
+      return subTasks.filter(task => task !== targetTask);
+    },
+    doneSubTask: function(subTasks, targetTask) {
+      subTasks = subTasks.map(task => {
         if (task === targetTask) {
           task.done = true;
         }
