@@ -32,26 +32,15 @@
                 <v-text-field single-line v-model="task.item" :disabled="task.done"></v-text-field>
               </v-flex>
               <v-flex xs1>
-                <v-btn icon color="pink lighten-2" :disabled="task.done" @click="addTask(task)">
+                <v-btn icon color="pink lighten-2" @click="addTask(task)" v-if="!task.done">
                   <v-icon id="addTaskBtn">mdi-plus</v-icon>
                 </v-btn>
               </v-flex>
+
               <v-flex xs3>
-                <v-btn
-                  icon
-                  color="blue"
-                  @click="timer(task)"
-                  :disabled="task.done"
-                  v-if="!task.done && task.tasks.length === 0"
-                >
-                  <v-icon v-if="!task.isRunning" class="timerBtn">mdi-timer</v-icon>
-                  <v-icon v-else class="timerBtn">mdi-watch-vibrate</v-icon>
-                </v-btn>
-                <span
-                  class="workTime"
-                  v-if="task.tasks.length === 0 || task.done"
-                >{{ task.workTime | msToHHMMSS }}</span>
+                <Timer :task="task"></Timer>
               </v-flex>
+
               <v-flex xs1>
                 <v-icon
                   class="removeTaskBtn"
@@ -64,7 +53,6 @@
             <!-- sub -->
             <draggable :options="{ group: 'task.tasks' }" v-model="task.tasks">
               <div v-for="child in task.tasks" v-bind:key="child.id">
-                <v-spacer></v-spacer>
                 <v-row align="center" justify="start">
                   <v-flex xs1></v-flex>
                   <v-flex xs1 @click="doneTask(child, task)">
@@ -76,17 +64,11 @@
                   <v-flex xs6>
                     <v-text-field v-model="child.item" :disabled="child.done"></v-text-field>
                   </v-flex>
+
                   <v-flex xs3>
-                    <v-btn icon color="blue" @click="timer(child)" v-if="!child.done">
-                      <v-icon v-if="!child.isRunning" class="timerBtn">mdi-timer</v-icon>
-                      <v-icon v-else class="timerBtn">mdi-watch-vibrate</v-icon>
-                    </v-btn>
-                    <span class="workTime">
-                      {{
-                      child.workTime | msToHHMMSS
-                      }}
-                    </span>
+                    <Timer :task="child"></Timer>
                   </v-flex>
+
                   <v-flex xs1>
                     <v-icon
                       class="removeTaskBtn"
@@ -109,46 +91,46 @@
 import draggable from "vuedraggable";
 import { setTimeout } from "timers";
 
+import Timer from "@/components/Timer";
+
 export default {
   components: {
-    draggable
+    draggable,
+    Timer
   },
   data: function() {
     return {
-      tasks: [],
-      done: false
+      tasks: []
     };
-  },
-  filters: {
-    msToHHMMSS: function(ms) {
-      const hh = String(Math.floor(ms / 3600000) + 100).substring(1);
-      const mm = String(
-        Math.floor((ms - hh * 3600000) / 60000) + 100
-      ).substring(1);
-      const ss = String(
-        Math.floor((ms - hh * 3600000 - mm * 60000) / 1000) + 100
-      ).substring(1);
-      return `${hh}:${mm}:${ss}`;
-    }
   },
   methods: {
     doneRatio: function(task) {
       task.progress =
         task.tasks.filter(task => task.done).length / task.tasks.length;
+
+      // TODO: 子タスクをもたない親タスクのprogressはNaNになる
+      if (Number.isNaN(task.progress)) {
+        task.progress = 1;
+      }
       if (task.progress === 1) {
         task.done = true;
-        task.tasks.map(subTask => {
-          task.workTime += subTask.workTime;
-        });
       }
+
+      // 親タスクのworkTimeに子タスクのworkTimeを加算する
+      // TODO: コンポーネントを分離する
+      let totalTime = task.wipTime;
+      task.tasks.map(subTask => {
+        if (subTask.done) totalTime += subTask.workTime;
+      });
+      task.workTime = Math.floor(totalTime);
     },
     doneTask: function(task, parent) {
       task.loading = true;
       setTimeout(() => {
         task.loading = false;
-        this.stopTimer(task);
         task.done = true;
-        this.doneRatio(parent);
+        if (parent) this.doneRatio(parent);
+        else this.doneRatio(task);
       }, 500);
     },
     addTask: function(task) {
@@ -165,6 +147,13 @@ export default {
         tasks: [],
         progress: 0
       };
+
+      if (task.isRunning) {
+        // タイマーが動いている場合は停止する
+        task.wipTime = task.workTime;
+        task.isRunning = false;
+        cancelAnimationFrame(task.timerAnimation);
+      }
 
       if (Array.isArray(task)) {
         task.push(obj);
@@ -185,28 +174,6 @@ export default {
         new Date().getTime().toString(16) +
         Math.floor(strong * Math.random()).toString(16)
       );
-    },
-    timer: function(task) {
-      if (task.isRunning) {
-        task.wipTime = task.workTime;
-        this.stopTimer(task);
-      } else {
-        task.isRunning = true;
-        task.startTime = Date.now();
-        this.startTimer(task);
-      }
-    },
-    startTimer: function(task) {
-      const nowTime = Date.now();
-      task.workTime = nowTime - task.startTime;
-      task.workTime += task.wipTime;
-      task.timerAnimation = requestAnimationFrame(() => {
-        this.startTimer(task);
-      });
-    },
-    stopTimer: function(task) {
-      task.isRunning = false;
-      cancelAnimationFrame(task.timerAnimation);
     }
   }
 };
