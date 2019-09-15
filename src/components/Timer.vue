@@ -1,6 +1,6 @@
 <template>
   <v-layout align-center>
-    <v-flex xs4 v-if="task.progress===1">
+    <v-flex xs4>
       <v-btn
         icon
         color="blue"
