@@ -1,6 +1,6 @@
 <template>
   <v-layout align-center>
-    <v-flex xs4>
+    <v-flex xs3>
       <v-btn
         icon
         color="blue"
@@ -12,28 +12,38 @@
         <v-icon v-else class="timerBtn">mdi-watch-vibrate</v-icon>
       </v-btn>
     </v-flex>
-    <v-flex xs8>
-      <span class="workTime">{{ task.workTime | msToHHMMSS }}</span>
+    <v-flex xs9>
+      <v-col>
+        <span
+          class="wipTime"
+          v-if="task.tasks.length === 0 && !task.done"
+        >{{ task.wipTime | timeFormatter }}</span>
+        <v-spacer></v-spacer>
+        <span class="workTime">{{ task.workTime | timeFormatter }}</span>
+      </v-col>
     </v-flex>
   </v-layout>
 </template>
 
 
 <script>
+import { msToHHMMSS } from "@/utils";
 export default {
   props: {
-    task: Object
+    task: Object,
+    parentTask: Object
   },
   filters: {
-    msToHHMMSS: function(ms) {
-      const hh = String(Math.floor(ms / 3600000) + 100).substring(1);
-      const mm = String(
-        Math.floor((ms - hh * 3600000) / 60000) + 100
-      ).substring(1);
-      const ss = String(
-        Math.floor((ms - hh * 3600000 - mm * 60000) / 1000) + 100
-      ).substring(1);
-      return `${hh}:${mm}:${ss}`;
+    timeFormatter: function(ms) {
+      return msToHHMMSS(ms);
+    }
+  },
+  watch: {
+    "task.done": function() {
+      // done時にタイマーが動いてる場合は停止する
+      if (this.task.isRunning) {
+        this.stopTimer(this.task);
+      }
     }
   },
   methods: {
@@ -48,17 +58,18 @@ export default {
     },
     startTimer: function(task) {
       const nowTime = Date.now();
-      task.workTime = nowTime - task.startTime;
-      task.workTime += task.wipTime;
+      task.wipTime = nowTime - task.startTime;
+
       task.timerAnimation = requestAnimationFrame(() => {
         this.startTimer(task);
       });
-      if (task.done) {
-        this.stopTimer(task);
-      }
     },
     stopTimer: function(task) {
-      task.wipTime = task.workTime;
+      if (this.parentTask) {
+        this.parentTask.workTime += task.wipTime;
+      }
+      task.workTime += task.wipTime;
+
       task.isRunning = false;
       cancelAnimationFrame(task.timerAnimation);
     }
