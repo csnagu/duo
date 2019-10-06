@@ -14,17 +14,15 @@
     </v-flex>
     <v-flex xs9>
       <v-col>
-        <span
-          class="wipTime"
-          v-if="task.tasks.length === 0 && !task.done"
-        >{{ task.wipTime | timeFormatter }}</span>
+        <span class="wipTime" v-if="task.tasks.length === 0 && !task.done">{{
+          task.wipTime | timeFormatter
+        }}</span>
         <v-spacer></v-spacer>
         <span class="workTime">{{ task.workTime | timeFormatter }}</span>
       </v-col>
     </v-flex>
   </v-layout>
 </template>
-
 
 <script>
 import { msToHHMMSS } from "@/utils";
