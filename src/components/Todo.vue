@@ -22,17 +22,34 @@
               </v-flex>
 
               <v-flex xs1 v-else @click="doneTask(task)">
-                <v-btn v-if="!task.done" icon color="green" :loading="task.loading">
+                <v-btn
+                  v-if="!task.done"
+                  icon
+                  color="green"
+                  :loading="task.loading"
+                >
                   <v-icon class="doneTaskBtn">mdi-circle-outline</v-icon>
                 </v-btn>
-                <v-icon v-if="task.done" color="green" class="doneTaskBtn">mdi-check</v-icon>
+                <v-icon v-if="task.done" color="green" class="doneTaskBtn"
+                  >mdi-check</v-icon
+                >
               </v-flex>
 
               <v-flex xs6>
-                <v-text-field single-line v-model="task.item" :disabled="task.done" autofocus></v-text-field>
+                <v-text-field
+                  single-line
+                  v-model="task.item"
+                  :disabled="task.done"
+                  autofocus
+                ></v-text-field>
               </v-flex>
               <v-flex xs1>
-                <v-btn icon color="pink lighten-2" @click="addTask(task)" v-if="!task.done">
+                <v-btn
+                  icon
+                  color="pink lighten-2"
+                  @click="addTask(task)"
+                  v-if="!task.done"
+                >
                   <v-icon id="addTaskBtn">mdi-plus</v-icon>
                 </v-btn>
               </v-flex>
@@ -42,7 +59,9 @@
               </v-flex>
 
               <v-flex xs1>
-                <v-icon class="removeTaskBtn" @click="removeTask(task)">mdi-delete</v-icon>
+                <v-icon class="removeTaskBtn" @click="removeTask(task)"
+                  >mdi-delete</v-icon
+                >
               </v-flex>
             </v-row>
 
@@ -52,13 +71,24 @@
                 <v-row align="center" justify="start">
                   <v-flex xs1></v-flex>
                   <v-flex xs1 @click="doneTask(child)">
-                    <v-btn v-if="!child.done" icon color="green" :loading="child.loading">
+                    <v-btn
+                      v-if="!child.done"
+                      icon
+                      color="green"
+                      :loading="child.loading"
+                    >
                       <v-icon class="doneTaskBtn">mdi-circle-outline</v-icon>
                     </v-btn>
-                    <v-icon v-if="child.done" color="green" class="doneTaskBtn">mdi-check</v-icon>
+                    <v-icon v-if="child.done" color="green" class="doneTaskBtn"
+                      >mdi-check</v-icon
+                    >
                   </v-flex>
                   <v-flex xs6>
-                    <v-text-field v-model="child.item" :disabled="child.done" autofocus></v-text-field>
+                    <v-text-field
+                      v-model="child.item"
+                      :disabled="child.done"
+                      autofocus
+                    ></v-text-field>
                   </v-flex>
 
                   <v-flex xs3>
@@ -69,7 +99,8 @@
                     <v-icon
                       class="removeTaskBtn"
                       @click="task.tasks = removeSubTask(task.tasks, child)"
-                    >mdi-delete</v-icon>
+                      >mdi-delete</v-icon
+                    >
                   </v-flex>
                 </v-row>
               </div>
